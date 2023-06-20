@@ -14,7 +14,7 @@ def download_image(url, filename):
         with open(file_path, 'wb') as file:
             for chunk in response.iter_content(1024): # Writing 1KB at a time
                 file.write(chunk)
-        print("Image downloaded successfully.")
+        print(f"{filename} downloaded successfully.")
     else:
         print("Failed to download image.")
 
