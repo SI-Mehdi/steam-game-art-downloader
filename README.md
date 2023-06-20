@@ -1,5 +1,5 @@
 # Steam Art Downloader
-Python script to download Steam art for games
+Python script to download Steam art for games. This is particularly useful for adding non-Steam games to Steam as these will require art to be provided manually
 
 # Instructions
 
