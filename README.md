@@ -14,7 +14,7 @@ To get your API key, log in to SteamGridDB with and go to the Preferences page o
 Then simply run the script in your terminal:
 
 ```
-python grid_download.py
+python art_download.py
 ```
 
 All images downloaded by this program are owned by their respective creators
