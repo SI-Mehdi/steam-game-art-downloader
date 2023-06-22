@@ -262,6 +262,7 @@ $RECYCLE.BIN/
 
 *_icon.png
 *_icon.jpg
+*_icon.ico
 
 # Constant file for API key
 constants.py
