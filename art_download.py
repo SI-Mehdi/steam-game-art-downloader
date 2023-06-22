@@ -3,7 +3,10 @@ import json
 import constants
 import os
 
-def download_image(url, filename):
+# For keeping track of which file types have been downloaded
+download_checklist = {"Grid": False, "Poster": False, "Hero": False, "Logo": False, "Icon": False}
+
+def download_image(url, filename, category):
     '''Download an image from a direct URL and store it in the same location
        as the Python file. Filename must end with the file extension
     '''
@@ -14,26 +17,42 @@ def download_image(url, filename):
         with open(file_path, 'wb') as file:
             for chunk in response.iter_content(1024): # Writing 1KB at a time
                 file.write(chunk)
-        print(f"{filename} downloaded successfully.")
+        download_checklist[category.capitalize()] = True # Mark this image type as being downloaded
+        print(f"{category.capitalize()} {filename} downloaded successfully.")
     else:
         print("Failed to download image.")
 
 def handle_response(json, category):
     '''Utility function to handle JSON response of images from the SteamGridDB API
-       Currently works with images in the PNG and JPG formats
+       Works with images in the PNG and JPG formats as well as ICO files for icons
     '''
 
     image_list = json["data"]
-    image_data = image_list[0]
-    image_url = image_data["url"]
-    if image_data["mime"] == "image/png":
-        filename = game_id + f"_{category}.png"
-        download_image(image_url, filename)
-    elif image_data["mime"] == "image/jpeg":
-        filename = game_id + f"_{category}.jpg"
-        download_image(image_url, filename)
-    else:
-        print("Error: The image had an unsupported filetype (must be JPG or PNG)!")
+    found_valid = False
+    index = 0
+
+    while not found_valid and index < len(image_list):
+        image_data = image_list[index]
+        image_url = image_data["url"]
+
+        # Images that have been taken down end with a '?' in the image URL
+        if image_url.endswith("?"):
+            index = index + 1
+        else:
+            found_valid = True
+
+            if image_data["mime"] == "image/png":
+                filename = game_id + f"_{category}.png"
+                download_image(image_url, filename, category)
+            elif image_data["mime"] == "image/jpeg":
+                filename = game_id + f"_{category}.jpg"
+                download_image(image_url, filename, category)
+            elif image_data["mime"] == "image/vnd.microsoft.icon":
+                filename = game_id + f"_{category}.ico"
+                download_image(image_url, filename, category)
+            else:
+                print("Error: The image had an unsupported filetype (must be JPG or PNG)!")
+
 
 def check_response(response, category):
     if response.status_code == 200:
@@ -53,14 +72,26 @@ hero_url = "https://www.steamgriddb.com/api/v2/heroes/game/" + game_id
 logo_url = "https://www.steamgriddb.com/api/v2/logos/game/" + game_id
 icon_url = "https://www.steamgriddb.com/api/v2/icons/game/" + game_id
 
-grid_response = requests.get(grid_poster_url, params={"dimensions": "920x430", "mimes": "image/png,image/jpeg"}, headers={"Authorization": f"Bearer {constants.api_key}"})
+grid_response = requests.get(grid_poster_url, params={"dimensions": "920x430,460x215", "mimes": "image/png,image/jpeg"}, headers={"Authorization": f"Bearer {constants.api_key}"})
 poster_response = requests.get(grid_poster_url, params={"dimensions": "600x900", "mimes": "image/png,image/jpeg"}, headers={"Authorization": f"Bearer {constants.api_key}"})
 hero_response = requests.get(hero_url, params={"mimes": "image/png,image/jpeg"}, headers={"Authorization": f"Bearer {constants.api_key}"})
 logo_response = requests.get(logo_url, params={"mimes": "image/png"}, headers={"Authorization": f"Bearer {constants.api_key}"})
-icon_response = requests.get(icon_url, params={"mimes": "image/png"}, headers={"Authorization": f"Bearer {constants.api_key}"})
+icon_response = requests.get(icon_url, headers={"Authorization": f"Bearer {constants.api_key}"})
 
 check_response(grid_response, "grid")
 check_response(poster_response, "poster")
 check_response(hero_response, "hero")
 check_response(logo_response, "logo")
 check_response(icon_response, "icon")
+
+
+# Print total number of files downloaded, check if one type of file was not downloaded
+total = 0
+for key in download_checklist:
+    if not download_checklist[key]:
+        print(f"ERROR: {key.capitalize()} was unable to be downloaded. Images may be unavailable on SteamGridDB or another error occured")
+    else:
+        total = total + 1
+        
+
+print(f"{total} of 5 files downloaded")
