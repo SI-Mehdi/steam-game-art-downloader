@@ -17,6 +17,9 @@ def check_query(input):
 
        Returns empty string if nothing found
     """
+    
+    if not input:
+        return "" 
 
     id_url = "https://www.steamgriddb.com/api/v2/games/id/" + input
     name_search_url = "https://www.steamgriddb.com/api/v2/search/autocomplete/" + input
