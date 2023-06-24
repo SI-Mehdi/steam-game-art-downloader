@@ -16,5 +16,6 @@ Then simply run the script in your terminal:
 ```
 python art_download.py
 ```
+You can then search for a title by Game ID or game name
 
 All images downloaded by this program are owned by their respective creators
