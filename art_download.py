@@ -2,9 +2,51 @@ import requests
 import json
 import constants
 import os
+import sys
 
 # For keeping track of which file types have been downloaded
 download_checklist = {"Grid": False, "Poster": False, "Hero": False, "Logo": False, "Icon": False}
+
+# def clear():
+#     os.system('cls' if os.name == 'nt' else 'clear')
+
+def check_query(input):
+    """Check a string to see if it matches with a game on the SteamGridDB database
+
+       First checks if the string is an ID, then checks for a name
+
+       Returns empty string if nothing found
+    """
+
+    id_url = "https://www.steamgriddb.com/api/v2/games/id/" + input
+    name_search_url = "https://www.steamgriddb.com/api/v2/search/autocomplete/" + input
+
+    id_response = requests.get(id_url, headers={"Authorization": f"Bearer {constants.api_key}"})
+    id_data = id_response.json()
+
+    if id_data['success'] == True:
+        data_object = id_data['data']
+        print(f'Found game: {data_object["name"]}')
+        game_id = data_object['id']
+        return str(game_id)
+    else:
+        print("No Game ID found, trying to search by name now...")
+    
+    name_response = requests.get(name_search_url, headers={"Authorization": f"Bearer {constants.api_key}"})
+    name_data = name_response.json()
+
+    if name_data['success'] == True:
+        data_list = name_data['data']
+        first_match = data_list[0]
+        print(f'Closest match: {first_match["name"]}')
+        game_id = first_match['id']
+        return str(game_id)
+    else:
+        print("No game name found")
+    
+    # Get here if there is no match
+
+    return ""
 
 def download_image(url, filename, category):
     '''Download an image from a direct URL and store it in the same location
@@ -31,11 +73,13 @@ def handle_response(json, category):
     found_valid = False
     index = 0
 
+    # Iterate until we find a valid image
+
     while not found_valid and index < len(image_list):
         image_data = image_list[index]
         image_url = image_data["url"]
 
-        # Images that have been taken down end with a '?' in the image URL
+        # Images that have been taken down or are invalid end with a '?' in the image URL
         if image_url.endswith("?"):
             index = index + 1
         else:
@@ -64,8 +108,12 @@ def check_response(response, category):
     else:
         print("Request failed, check your API key and try again")
 
+query = input("Enter the name of the game or SteamGridDB Game ID: ")
+game_id = check_query(query)
 
-game_id = input("Enter the Game ID: ")
+if not game_id:
+    print("ERROR: No game was found... Try again with a more specific name or check the ID")
+    sys.exit(0)
 
 grid_poster_url = "https://www.steamgriddb.com/api/v2/grids/game/" + game_id
 hero_url = "https://www.steamgriddb.com/api/v2/heroes/game/" + game_id
