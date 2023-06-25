@@ -20,4 +20,6 @@ You can then search for a title by Game ID or game/app name
 
 Images and icons will be downloaded to separate folders for each game. The folders will be created in the same directory as the Python script.
 
+Note that if a folder already exists for a game, it will be overwritten.
+
 All images downloaded by this program are owned by their respective creators
