@@ -2,13 +2,29 @@ import requests
 import json
 import constants
 import os
+import shutil
 import sys
 
 # For keeping track of which file types have been downloaded
 download_checklist = {"Grid": False, "Poster": False, "Hero": False, "Logo": False, "Icon": False}
+current_path = os.path.dirname(__file__)
 
 # def clear():
 #     os.system('cls' if os.name == 'nt' else 'clear')
+
+def create_folder(path, game_name):
+    """Create a folder with the name of the target game at the path provided.
+       If the folder exists, it is overwritten.
+    """
+
+    folder_path = os.path.join(path, game_name)
+    if os.path.exists(folder_path):
+        print("Folder for this game already exists, overwriting...")
+        shutil.rmtree(folder_path)
+    
+    print(f'Creating folder for {game_name}')
+    os.makedirs(folder_path)
+    return folder_path
 
 def check_query(input):
     """Check a string to see if it matches with a game on the SteamGridDB database
@@ -17,6 +33,7 @@ def check_query(input):
 
        Returns empty string if nothing found
     """
+    global current_path # Using the path defined, default is current directory
     
     if not input:
         return "" 
@@ -30,6 +47,8 @@ def check_query(input):
     if id_data['success'] == True:
         data_object = id_data['data']
         print(f'Found game: {data_object["name"]}')
+        new_path = create_folder(current_path, data_object["name"])
+        current_path = new_path
         game_id = data_object['id']
         return str(game_id)
     else:
@@ -43,6 +62,8 @@ def check_query(input):
         first_match = data_list[0]
         print(f'Closest match: {first_match["name"]}')
         game_id = first_match['id']
+        new_path = create_folder(current_path, first_match["name"])
+        current_path = new_path
         return str(game_id)
     else:
         print("No game name found")
@@ -58,7 +79,7 @@ def download_image(url, filename, category):
 
     response = requests.get(url, stream=True)
     if response.status_code == 200:
-        file_path = os.path.join(os.path.dirname(__file__), filename)
+        file_path = os.path.join(current_path, filename)
         with open(file_path, 'wb') as file:
             for chunk in response.iter_content(1024): # Writing 1KB at a time
                 file.write(chunk)
@@ -110,6 +131,8 @@ def check_response(response, category):
             print("There was an error in the JSON output!")
     else:
         print("Request failed, check your API key and try again")
+
+
 
 query = input("Enter the name of the game or SteamGridDB Game ID: ")
 game_id = check_query(query)
