@@ -88,6 +88,17 @@ def download_image(url, filename, category):
     else:
         print("Failed to download image.")
 
+def check_response(response, category):
+    if response.status_code == 200:
+        json_data = response.json()
+        if json_data["success"] == True:
+            handle_response(json_data, category)
+        else:
+            print("There was an error in the JSON output!")
+    else:
+        print("Request failed, check your API key and try again")
+
+
 def handle_response(json, category):
     '''Utility function to handle JSON response of images from the SteamGridDB API
        Works with images in the PNG and JPG formats as well as ICO files for icons
@@ -119,19 +130,7 @@ def handle_response(json, category):
                 filename = game_id + f"_{category}.ico"
                 download_image(image_url, filename, category)
             else:
-                print("Error: The image had an unsupported filetype (must be JPG or PNG)!")
-
-
-def check_response(response, category):
-    if response.status_code == 200:
-        json_data = response.json()
-        if json_data["success"] == True:
-            handle_response(json_data, category)
-        else:
-            print("There was an error in the JSON output!")
-    else:
-        print("Request failed, check your API key and try again")
-
+                print("Error: The image had an unsupported filetype (must be JPG, PNG or ICO)!")
 
 
 query = input("Enter the name of the game or SteamGridDB Game ID: ")
@@ -163,7 +162,7 @@ check_response(icon_response, "icon")
 total = 0
 for key in download_checklist:
     if not download_checklist[key]:
-        print(f"ERROR: {key.capitalize()} was unable to be downloaded. Images may be unavailable on SteamGridDB or another error occured")
+        print(f"ERROR: {key} was unable to be downloaded. Images may be unavailable on SteamGridDB or another error occured")
     else:
         total = total + 1
         
