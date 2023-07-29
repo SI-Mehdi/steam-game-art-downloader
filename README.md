@@ -11,6 +11,8 @@ In this file add a variable for your SteamGridDB API key like so:
 ``` 
 api_key = # YOUR API KEY HERE #
 ```
+The API key should be a string.
+
 To get your API key, log in to SteamGridDB and go to the Preferences page of your profile and select the API tab
 
 Then simply run the script in your terminal:
