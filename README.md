@@ -1,6 +1,8 @@
 # Steam Art Downloader
 Python script to download Steam art for games and programs via SteamGridDB. This is particularly useful for adding non-Steam games or programs to Steam as these will require art to be provided manually
 
+[SGDBoop](https://www.steamgriddb.com/boop) already exists for this purpose and is the tool provided by SteamGridDB, but I decided to make this simply as an exercise.
+
 # Instructions
 
 Clone the repository and create a file called ```constants.py``` at the root
